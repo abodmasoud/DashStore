@@ -54,9 +54,10 @@ class Order extends Model
         return $number;
     }
 
+    /** Includes soft-deleted customers so order history stays intact. */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     public function items(): HasMany

@@ -8,10 +8,14 @@ use Illuminate\Http\Request;
 class Authenticate extends Middleware
 {
     /**
-     * Get the path the user should be redirected to when they are not authenticated.
+     * Send guests to the login page that matches the area they tried to open.
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        if ($request->expectsJson()) {
+            return null;
+        }
+
+        return $request->routeIs('admin.*') ? route('admin.login') : route('login');
     }
 }

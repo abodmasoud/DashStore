@@ -122,6 +122,9 @@ php artisan serve
 | Admin    | `admin@dashstore.test`    | `password` |
 | Customer | `customer@dashstore.test` | `password` |
 
+- Store: http://localhost:8000 (log in at `/login`)
+- Admin dashboard: http://localhost:8000/admin (log in at `/admin/login`)
+
 The seeder also creates 5 categories, 6 brands, 60 products (some discounted, some out of stock) and sample orders.
 
 ### Running tests
@@ -135,7 +138,7 @@ Tests run against an in-memory SQLite database, so they don't need MySQL.
 ## Roadmap
 
 - [x] **Foundation:** Laravel 12 upgrade, database redesign, factories, seeders, tests
-- [ ] **Authentication:** customer login and registration, separate admin login
+- [x] **Authentication:** customer login and registration, separate admin login, rate limiting
 - [ ] **Admin catalog:** CRUD for categories, brands and products with image uploads
 - [ ] **Storefront:** home page, product listing and filters, product page, cart, checkout
 - [ ] **Orders and dashboard:** order management, status workflow, sales statistics

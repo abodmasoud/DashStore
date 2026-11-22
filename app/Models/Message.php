@@ -2,20 +2,34 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * A message in the support conversation between a customer and the store.
+ */
 class Message extends Model
 {
-    use HasFactory;
+    protected $fillable = ['user_id', 'admin_id', 'from_admin', 'body', 'read_at'];
 
-    public function sender()
+    protected $casts = [
+        'from_admin' => 'boolean',
+        'read_at' => 'datetime',
+    ];
+
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Admin::class, 'sender_id');
+        return $this->belongsTo(User::class);
     }
 
-    public function receiver()
+    public function admin(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'receiver_id');
+        return $this->belongsTo(Admin::class);
+    }
+
+    public function scopeUnread(Builder $query): Builder
+    {
+        return $query->whereNull('read_at');
     }
 }

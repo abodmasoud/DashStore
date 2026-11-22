@@ -1,66 +1,150 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# DashStore
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A full-featured e-commerce store built with **Laravel 12**: a customer-facing storefront and an admin dashboard for managing the catalog, orders and customers.
 
-## About Laravel
+> 🚧 **Status:** under active development. See the [roadmap](#roadmap) below.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-SB%20Admin%202-7952B3?logo=bootstrap&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+Target scope of the project. Progress is tracked in the [roadmap](#roadmap).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Storefront (customers)**
+- Browse products by category and brand, with search and filters
+- Product pages with image gallery, discounts and stock status
+- Shopping cart and checkout
+- Order history and order tracking
+- Support chat with the store
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Admin dashboard**
+- Separate admin authentication (dedicated guard)
+- Manage categories, brands and products (with multiple images)
+- Order management with an enforced status workflow
+- Sales statistics and recent activity
+- Reply to customer messages
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tech stack
 
-## Laravel Sponsors
+| Layer      | Technology                                  |
+|------------|---------------------------------------------|
+| Backend    | PHP 8.2+, Laravel 12, Eloquent ORM          |
+| Frontend   | Blade, Bootstrap, SB Admin 2, Vite          |
+| Database   | MySQL (SQLite for tests)                    |
+| Auth       | Laravel session guards (`web` + `admin`), Sanctum |
+| Testing    | PHPUnit 11                                  |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Database design
 
-### Premium Partners
+```mermaid
+erDiagram
+    CATEGORIES ||--o{ PRODUCTS : contains
+    BRANDS ||--o{ PRODUCTS : makes
+    PRODUCTS ||--o{ PRODUCT_IMAGES : has
+    USERS ||--o{ CART_ITEMS : adds
+    PRODUCTS ||--o{ CART_ITEMS : "added as"
+    USERS ||--o{ ORDERS : places
+    ORDERS ||--|{ ORDER_ITEMS : contains
+    PRODUCTS ||--o{ ORDER_ITEMS : "sold as"
+    USERS ||--o{ MESSAGES : "chats in"
+    ADMINS ||--o{ MESSAGES : replies
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+    PRODUCTS {
+        bigint id
+        string name
+        string slug
+        decimal price
+        decimal discount_price
+        int quantity
+        bool is_active
+        bool is_featured
+    }
+    ORDERS {
+        bigint id
+        string number
+        string status
+        decimal subtotal
+        decimal total
+    }
+    ORDER_ITEMS {
+        string product_name
+        decimal unit_price
+        int quantity
+        decimal total
+    }
+```
 
-## Contributing
+A few design decisions worth noting:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- **Order items snapshot the product** (name and unit price at purchase time), so editing or deleting a product never changes past orders.
+- **Order status is a PHP enum** (`App\Enums\OrderStatus`) with explicit allowed transitions, for example a shipped order can't be cancelled.
+- **Real foreign keys** with deliberate delete rules: you can't delete a category that still has products, and deleting a brand just un-links its products.
+- **Slugs** are generated automatically and used in URLs.
 
-## Code of Conduct
+## Getting started
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Requirements
 
-## Security Vulnerabilities
+- PHP 8.2+ and Composer
+- Node.js 18+ and npm
+- MySQL 8 (or MariaDB)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Installation
+
+```bash
+git clone https://github.com/abodmasoud/DashStore.git
+cd DashStore
+
+composer install
+npm install
+
+cp .env.example .env
+php artisan key:generate
+```
+
+Create a database named `dashstore` and update the `DB_*` values in `.env`. Then:
+
+```bash
+php artisan migrate --seed
+npm run dev
+php artisan serve
+```
+
+### Demo accounts
+
+| Role     | Email                     | Password   |
+|----------|---------------------------|------------|
+| Admin    | `admin@dashstore.test`    | `password` |
+| Customer | `customer@dashstore.test` | `password` |
+
+The seeder also creates 5 categories, 6 brands, 60 products (some discounted, some out of stock) and sample orders.
+
+### Running tests
+
+```bash
+php artisan test
+```
+
+Tests run against an in-memory SQLite database, so they don't need MySQL.
+
+## Roadmap
+
+- [x] **Foundation:** Laravel 12 upgrade, database redesign, factories, seeders, tests
+- [ ] **Authentication:** customer login and registration, separate admin login
+- [ ] **Admin catalog:** CRUD for categories, brands and products with image uploads
+- [ ] **Storefront:** home page, product listing and filters, product page, cart, checkout
+- [ ] **Orders and dashboard:** order management, status workflow, sales statistics
+- [ ] **Polish:** screenshots, CI with GitHub Actions, live demo
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Released under the [MIT License](LICENSE).
+
+---
+
+Built by [Abdulrahman Masoud](https://github.com/abodmasoud).
